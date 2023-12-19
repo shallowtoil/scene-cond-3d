@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html><head lang="en"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Scene-Cond-3D</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://shallowtoil.github.io/scene-cond-3d">
+    <meta property="og:title" content="Scene-Conditional 3D Object Stylization and Composition">
+    <meta property="og:description" content="Recently, 3D generative models have made impressive progress, enabling the generation of almost arbitrary 3D assets from text or image inputs. However, these approaches generate objects in isolation without any consideration for the scene where they will eventually be placed. In this paper, we propose a framework that allows for the stylization of an existing 3D asset to fit into a given 2D scene, and additionally produce a photorealistic composition as if the asset was placed within the environment. This not only opens up a new level of control for object stylization, for example, the same assets can be stylized to reflect changes in the environment, such as summer to winter or fantasy versus futuristic settings—but also makes the object-scene composition more controllable. We achieve this by combining modeling and optimizing the object's texture and environmental lighting through differentiable ray tracing with image priors from pre-trained text-to-image diffusion models. We demonstrate that our method is applicable to a wide variety of indoor and outdoor scenes and arbitrary objects.">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Scene-Conditional 3D Object Stylization and Composition">
+    <meta name="twitter:description" content="Recently, 3D generative models have made impressive progress, enabling the generation of almost arbitrary 3D assets from text or image inputs. However, these approaches generate objects in isolation without any consideration for the scene where they will eventually be placed. In this paper, we propose a framework that allows for the stylization of an existing 3D asset to fit into a given 2D scene, and additionally produce a photorealistic composition as if the asset was placed within the environment. This not only opens up a new level of control for object stylization, for example, the same assets can be stylized to reflect changes in the environment, such as summer to winter or fantasy versus futuristic settings—but also makes the object-scene composition more controllable. We achieve this by combining modeling and optimizing the object's texture and environmental lighting through differentiable ray tracing with image priors from pre-trained text-to-image diffusion models. We demonstrate that our method is applicable to a wide variety of indoor and outdoor scenes and arbitrary objects.">
+
+    <!-- mirror: F0%9F%AA%9E&lt -->
+    <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;%E2%9C%A8&lt;/text&gt;&lt;/svg&gt;">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Whisper&display=swap">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/codemirror.min.js"></script>
+    <script src="js/clipboard.min.js"></script>
+    <script src="js/video_comparison.js"></script>
+    <script src="js/video_switch.js"></script>
+    <script src="js/app.js"></script>
+</head>
+
+<body>
+    <div class="container" id="header" style="text-align: center; margin: auto;">
+        <div class="row" id="title-row" style="max-width: 100%; margin: 0 auto; display: inline-block">
+            <h1 class="col-md-12 text-center" id="title">
+                <b>Scene-Conditional 3D Object Stylization and Composition</b>
+                <br>
+                <h2 id="subtitle">
+                    <img src="img/hand_seize.png" style="height: 30px; width: auto;"> Place Your 3D Objects into 2D Scenes <img src="img/hand_release.png" style="height: 30px; width: auto;">
+                </h2>
+            </h1>
+        </div>
+        <div class="row" id="author-row" style="margin:0 auto;">
+            <div class="col-md-12 text-center" style="display: table; margin:0 auto">
+                <table class="author-table" id="author-table">
+                    <tr>
+                        <td>
+                            <a style="text-decoration:none" href="https://shallowtoil.github.io">
+                              Jinghao Zhou
+                            </a>
+                        </td>
+                        <td>
+                            <a style="text-decoration:none" href="https://www.robots.ox.ac.uk/~tomj/">
+                              Tomas Jakab
+                            </a>
+                        </td>
+                        <td>
+                            <a style="text-decoration:none" href="https://www.robots.ox.ac.uk/~phst/">
+                              Philip Torr
+                            </a>
+                        </td>
+                        <td>
+                            <a style="text-decoration:none" href="https://chrirupp.github.io/">
+                              Christian Rupprecht
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align:center;">
+                            University of Oxford
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('author-row').style.maxWidth = document.getElementById("title-row").clientWidth + 'px';
+    </script>
+    
+    <div class="container" id="teaser">
+        <div class="row">
+            <div class="col-sm-6 col-sm-offset-3 text-center">
+                <ul class="nav nav-pills nav-justified">
+                    <li>
+                        <a href="https://arxiv.org/abs/2112.03907">
+                        <img src="./img/paper_image.png" height="60px">
+                            <h4><strong>Paper</strong></h4>
+                        </a>
+                    </li>
+                    <!-- <li>
+                        <a href="">
+                        <img src="./img/youtube_icon.png" height="60px">
+                            <h4><strong>Video</strong></h4>
+                        </a>
+                    </li>                          -->
+                    <li>
+                        <a href="https://github.com/shallowtoil/scene-cond-3d" target="_blank">
+                        <image src="img/github.png" height="60px">
+                            <h4><strong>Code</strong></h4>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        
+        <div class="text-center" style="font-family: 'Whisper', cursive; font-size: 25px;">
+            "I don't paint things. I only paint the difference between things."
+            <br>
+            <div class="text-right" style="width: 43%;  margin-left: auto; margin-right: auto;">
+                — Henri Matisse
+            </div>
+            <br>
+        </div>
+
+        <!-- <style>
+            /* Custom CSS to eliminate the space between columns */
+            .no-gutter > [class*='col-'] {
+                padding-right: 0;
+                padding-left: 0;
+            }
+        </style>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="video-compare-container" id="apocalypse1Div">
+                    <video class="video" id="apocalypse1" loop playsinline autoPlay muted src="video/apocalypse-web-1.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="apocalypse1Merge"></canvas>
+                </div>
+			</div>
+            <div class="col-md-6">
+                <div class="video-compare-container" id="apocalypse2Div">
+                    <video class="video" id="apocalypse2" loop playsinline autoPlay muted src="video/apocalypse-web-2.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="apocalypse2Merge"></canvas>
+                </div>
+			</div>
+        </div> -->
+
+        <table width="100%">
+            <tr>
+                <td align="left" valign="top" width="50%">
+                    <div class="video-compare-container" id="apocalypse1Div">
+                        <video class="video" id="apocalypse1" loop playsinline autoPlay muted src="video/apocalypse-web-1.mp4" onplay="resizeAndPlay(this)"></video>
+                        <canvas height=0 class="videoMerge" id="apocalypse1Merge"></canvas>
+                    </div>
+                </td>
+                <td align="left" valign="top" width="50%">
+                    <div class="video-compare-container" id="apocalypse2Div">
+                        <video class="video" id="apocalypse2" loop playsinline autoPlay muted src="video/apocalypse-web-2.mp4" onplay="resizeAndPlay(this)"></video>
+                        <canvas height=0 class="videoMerge" id="apocalypse2Merge"></canvas>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="container" id="main" style="width: 60%">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Abstract
+                </h3>
+                <p class="text-justify"><i>
+                    Recently, 3D generative models have made impressive progress, enabling the generation of almost arbitrary 3D assets from text or image inputs. 
+                    However, these approaches generate objects in isolation without any consideration for the scene where they will eventually be placed. 
+                    In this paper, we propose a framework that allows for the stylization of an existing 3D asset to fit into a given 2D scene, and additionally produce a photorealistic composition as if the asset was placed within the environment. 
+                    This not only opens up a new level of control for object stylization, for example, the same assets can be stylized to reflect changes in the environment, such as summer to winter or fantasy versus futuristic settings-but also makes the object-scene composition more controllable. 
+                    We achieve this by combining modeling and optimizing the object's texture and environmental lighting through differentiable ray tracing with image priors from pre-trained text-to-image diffusion models. 
+                    We demonstrate that our method is applicable to a wide variety of indoor and outdoor scenes and arbitrary objects.
+                </i></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Framework
+                </h3>
+                <div class="text-justify">
+                    In this paper, we are motivated by a practical goal-<b>what if a 3D object is placed into a 2D scene?</b>-and propose a novel framework that allows:
+                    <ul style="margin-bottom: 0px">
+                        <li><b>Stylizing the object</b> with an adapted texture that aligns with the given scene; and</li>
+                        <li>Achieving a <b>photorealistic scene composition</b> with the aid of estimated light of the environment.</li>
+                    </ul>
+                    We formulate the problem through the lens of a creative tool, animated as below.
+                    <br><br>
+                </div>
+                <div class="text-center">
+                    <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                        <source src="video/framework_animated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Texture Adptation
+                </h3>
+                <div class="text-justify">
+                    Achieving a realistic texture adaptation for 3D objects placed into 2D scenes requires three components: <b><i>Environmental Influence</i></b> involves adjusting the texture to realistically reflect the environmental impact; <b><i>Identity Preservation</i></b> aims to preserve the objects' unique visual aspects, and <b><i>Blending</i></b> focuses on guiding the texture adaptation to match the visual characteristic of the scene, ensuring seamless integration with the surroundings and avoiding stark contrasts. 
+                    <br>
+                </div>
+                <div class="text-center">
+                    <video id="refdir" width="67%" playsinline autoplay loop muted>
+                        <source src="video/texturizationpipeline_animated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="text-justify">
+                    We visualize its training dynamics, showcasing the rendered images, the positive and negative supervisory targets, the PBR texture maps, and the augmented HDR environment map (from top-left to bottom-right).
+                    <br><br>
+                </div>
+                <div class="text-center">
+                    <video id="refdir" width="100%" playsinline autoplay loop muted>
+                        <source src="video/metal_barel_illustrated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Light Estimation
+                </h3>
+                <div class="text-justify">
+                    To light the object, we utilize a high dynamic range (HDR) environment map, which is well-suited for representing natural illumination. Since the given 2D scene image only captures a small angle of the full 360-degree environment map, we first use the image as input to estimate a low dynamic range (LDR) environment map. This process depends on the scene type (<i>i.e.</i>, indoor versus outdoor) and is explained below.
+                    <br><br>
+                </div>
+                <div class="text-center">
+                    <video id="refdir" width="60%" playsinline autoplay loop muted>
+                        <source src="video/lightingldrpipeline_animated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <br>
+                <div class="text-justify">
+                    Inspired by the traditional inverse rendering setup where the environment map can almost be perfectly reconstructed from objects' reflections, we introduce a novel concept that incorporates a virtual light-capturing apparatus alongside the object of interest during the optimization process.
+                    <br><br>
+                </div>
+                <div class="text-center">
+                    <video id="refdir" width="100%" playsinline autoplay loop muted>
+                        <source src="video/sofa_living_room_sphere_illustrated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="text-center">
+                    <video id="refdir" width="100%" playsinline autoplay loop muted>
+                        <source src="video/sofa_living_room_illustrated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Visual Results
+                </h3>
+                Our method successfully blends the objects into various environments, achieving photorealistic adaptation for both appearance and lighting. This includes scenarios drawn from both real-world and fantasy settings.
+                <br>
+                <div class="video-compare-container">
+                    <video class="video" id="fireplace" loop playsinline autoPlay muted src="video/fireplace-web.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="fireplaceMerge"></canvas>
+                </div>
+                <br>
+                <div class="video-compare-container">
+                    <video class="video" id="sandstorm" loop playsinline autoPlay muted src="video/sandstorm-web.mp4" onplay="resizeAndPlay(this)"></video>
+                    <canvas height=0 class="videoMerge" id="sandstormMerge"></canvas>
+                </div>
+                <br>
+                <table width="100%">
+                    <tr>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/projector_abandoned_house.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/woodworking_barel.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/mud_astronaut.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/salt_flat_dog_statue.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/tv_mud.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/umbrella_abandoned_house.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/seabed_drawer.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/beach_firehydrant.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                        <td align="left" valign="top" width="33%">
+                            <div class="text-center">
+                                <video id="ide" width="100%" playsinline autoplay controls loop muted>
+                                    <source src="video/robot_war_vera.mp4" type="video/mp4" />
+                                </video>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+			</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Case Study
+                </h3>
+                We conduct a case study where we specifically place a <i>leather sofa</i> into a diverse array of scenes:
+                <br><br>
+                <video id="sofa-video" muted autoplay webkit-playsinline playsinline loop>
+                    <source id="sofa-video-src" src="video/sofa_reference_combined.mp4" type="video/mp4">
+                </video>
+                <div class="video-text">
+                    <span class="overlay-text" id="sofa-text"></span>
+                </div>
+                <div class="base-row sofa-thumbnail-row" style="display: flex; justify-content: center; align-items: center;">
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="reference">
+                        <img src="icon/arrows-loop-recycle-recycling-waste-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                        Reference
+                        </button>
+                    </div>
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="mars">
+                        <img src="icon/mars-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                        Mars
+                        </button>
+                    </div>
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="swamp">
+                        <img src="icon/wetland-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                        Swamp
+                        </button>
+                    </div>
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="rainy_street">
+                        <img src="icon/rainy-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                        Rainy Street
+                        </button>
+                    </div>
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="painting_studio">
+                        <img src="icon/easel-canvas-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                        Painting Studio
+                        </button>
+                    </div>
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="mud_volcano">
+                        <img src="icon/volcano-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                        Mud Volcano
+                        </button>
+                    </div>
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="seabed">
+                        <img src="icon/sea-life-fish-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                        Seabed
+                        </button>
+                    </div>
+                    <div class="base-col sofa-thumbnail-col">
+                        <button class="thumbnail-btn" id="cyberpunk">
+                            <img src="icon/alien-obduction-svgrepo-com.svg" alt="paper" class="thumbnails" />
+                            Cyberpunk
+                        </button>
+                    </div>
+                </div>
+			</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Scene-Agnostic Texturing
+                </h3>
+                <div class="text-justify">
+                    We compare our framework with in the <b>scene-agnostic texture generation</b> setup with mesh texturing methods: <a href="https://ml.cs.tsinghua.edu.cn/prolificdreamer/">Prolific Dreamer</a>, <a href="https://fantasia3d.github.io/">Fantasia3D</a>, and <a href="https://texturepaper.github.io/TEXTurePaper/">TEXTure</a>. Our method demonstrates superior photo-realistic texture generation, leveraging VSD.
+                    <br><br>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; overflow: hidden; ">
+                    <video id="sceneagnostice" width="67%" playsinline autoplay loop muted>
+                        <source src="video/sceneagnostic_animated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <br>
+                <div class="text-justify">
+                    Additionally, we also consider a <b>scene-agnostic texture editing</b> setup and compare with a self-baseline using <a href="https://www.timothybrooks.com/instruct-pix2pix">InstructPix2Pix</a>. Instead of using instructions as text prompts, we directly use appearance descriptions. The experiments reveal that our method is a performant alternative for general instruction-following 3D editing tasks, providing much more fine-grained and accurate control.                    <br><br>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; overflow: hidden;">
+                    <video id="sceneagnosticediting" width="100%" playsinline autoplay loop muted>
+                        <source src="video/sceneagnosticediting_animated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+            </div>
+        </div>
+
+            
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Citation
+                </h3>
+                <div class="form-group col-md-10 col-md-offset-1">
+                    <textarea id="bibtex" class="form-control" readonly>
+@article{verbin2022refnerf,
+    title={{Ref-NeRF}: Structured View-Dependent Appearance for
+           Neural Radiance Fields},
+    author={Dor Verbin and Peter Hedman and Ben Mildenhall and
+            Todd Zickler and Jonathan T. Barron and Pratul P. Srinivasan},
+    journal={CVPR},
+    year={2022}
+}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2"> 
+                The website template was borrowed from <a href="http://mgharbi.com/">Michaël Gharbi</a> and <a href="https://instruct-nerf2nerf.github.io/">Instruct-NeRF2NeRF</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+</body></html>
