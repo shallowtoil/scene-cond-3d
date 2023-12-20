@@ -2,14 +2,14 @@
 
 This Github repository hosts the future release of the code for paper **Scene-Conditional 3D Object Stylization and Composition**. Check the project page for videos and animations.
 
-[[`arXiv`]()] [[`project page`](https://shallowtoil.github.io/scene-cond-3d/)]
+[[`arXiv`](https://arxiv.org/abs/2312.12419)] [[`project page`](https://shallowtoil.github.io/scene-cond-3d/)]
 
 <div align="center">
   <img width="90%" alt="framework" src=".github/framework.png">
 </div>
 
 ### News :tada:
-- December 2022 - Release the pre-print on [arXiv]().
+- December 2022 - Release the pre-print on [arXiv](https://arxiv.org/abs/2312.12419).
 
 
 ### Abstract
@@ -19,12 +19,10 @@ Recently, 3D generative models have made impressive progress, enabling the gener
 ### Citation
 
 ```
-@article{verbin2022refnerf,
-    title={{Ref-NeRF}: Structured View-Dependent Appearance for
-           Neural Radiance Fields},
-    author={Dor Verbin and Peter Hedman and Ben Mildenhall and
-            Todd Zickler and Jonathan T. Barron and Pratul P. Srinivasan},
-    journal={CVPR},
-    year={2022}
+@article{zhou2023sceneconditional,
+    title={Scene-Conditional 3D Object Stylization and Composition},
+    author={Jinghao Zhou and Tomas Jakab and Philip Torr and Christian Rupprecht},
+    journal={arXiv preprint arXiv:2312.12419},
+    year={2023}
 }
 ```
